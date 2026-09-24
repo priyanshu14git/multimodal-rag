@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.env
+backend/data/raw_pdfs/*
+backend/data/processed/*
+backend/data/vectorstore/*
+!backend/data/**/.gitkeep
+.DS_Store

@@ -1,0 +1,41 @@
+# --- Core API ---------------------------------------------------------
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+python-dotenv
+
+# --- PDF / table / image parsing --------------------------------------
+# PyMuPDF: fast text + image + bbox extraction, no system deps.
+# pdfplumber: purpose-built table structure detection (PyMuPDF's table
+# support is weaker); using both for what each is best at.
+pymupdf
+pdfplumber
+
+# --- Embeddings ---------------------------------------------------------
+# Text: bge-small-en-v1.5 (via sentence-transformers) - small, fast, strong
+# retrieval score, runs fine on CPU or MPS.
+sentence-transformers
+# Image: SigLIP (via transformers) - outperforms CLIP at a comparable
+# compute budget, good MPS support on Apple Silicon.
+transformers
+torch
+pillow
+
+# --- Vector store ---------------------------------------------------------
+chromadb
+
+# --- LLM (local, Apple Silicon friendly) ---------------------------------
+ollama
+
+# --- Frontend -------------------------------------------------------------
+streamlit
+
+# --- Eval -----------------------------------------------------------------
+pandas
+scikit-learn
+
+# --- Dev / testing only (not needed at runtime) ----------------------------
+reportlab   # used only to generate a synthetic sample PDF for pipeline testing
+pytest
