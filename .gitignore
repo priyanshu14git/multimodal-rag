@@ -5,5 +5,6 @@ __pycache__/
 backend/data/raw_pdfs/*
 backend/data/processed/*
 backend/data/vectorstore/*
+backend/data/chroma/
 !backend/data/**/.gitkeep
 .DS_Store
