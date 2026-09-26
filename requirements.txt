@@ -39,3 +39,5 @@ scikit-learn
 # --- Dev / testing only (not needed at runtime) ----------------------------
 reportlab   # used only to generate a synthetic sample PDF for pipeline testing
 pytest
+
+requests
