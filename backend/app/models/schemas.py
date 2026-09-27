@@ -92,6 +92,15 @@ class RetrievedElement(BaseModel):
 class AskRequest(BaseModel):
     doc_id: str
     question: str
+    # --- Optional retrieval/generation controls (all default to the
+    # pipeline's original fixed behavior, so existing callers that omit
+    # these fields see no change) -------------------------------------
+    top_k_text: int = 5
+    top_k_images: int = 3
+    include_text: bool = True
+    include_images: bool = True
+    include_tables: bool = True
+    temperature: float = 0.15
 
 
 class Citation(BaseModel):

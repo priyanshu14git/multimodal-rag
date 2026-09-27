@@ -135,6 +135,7 @@ def generate_multimodal_answer(
     context: str,
     image_paths: list[str] | None = None,
     image_context: str = "",
+    temperature: float = 0.15,
 ) -> str:
 
     image_paths = image_paths or []
@@ -231,7 +232,7 @@ Write the final answer directly.
             },
         ],
         options={
-            "temperature": 0.15,
+            "temperature": temperature,
             "num_ctx": 8192,
             "repeat_penalty": 1.15,
             "top_p": 0.9,

@@ -90,6 +90,12 @@ def ask_question(request: AskRequest):
         result = answer_multimodal_question(
             question=request.question,
             doc_id=request.doc_id,
+            n_text_results=request.top_k_text,
+            n_image_results=request.top_k_images,
+            include_text=request.include_text,
+            include_images=request.include_images,
+            include_tables=request.include_tables,
+            temperature=request.temperature,
         )
 
         return result

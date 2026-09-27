@@ -422,6 +422,10 @@ def answer_multimodal_question(
     doc_id: str,
     n_text_results: int = 5,
     n_image_results: int = 3,
+    include_text: bool = True,
+    include_images: bool = True,
+    include_tables: bool = True,
+    temperature: float = 0.15,
 ) -> dict:
     client = vectorstore.get_client()
     text_embedder = get_text_embedder()
@@ -432,33 +436,51 @@ def answer_multimodal_question(
     # ========================================================
     # TEXT RETRIEVAL
     # ========================================================
-    if architecture_question:
-        # Architecture-style questions get a wider candidate pool because
-        # semantic retrieval alone often ranks generic technical prose
-        # above the specific passage that describes this document's model.
-        candidate_text_results = max(n_text_results * 8, 40)
+    if not include_text:
+        documents, metadatas, distances = [], [], []
     else:
-        candidate_text_results = max(n_text_results * 3, 12)
+        if architecture_question:
+            # Architecture-style questions get a wider candidate pool
+            # because semantic retrieval alone often ranks generic
+            # technical prose above the specific passage that describes
+            # this document's model.
+            candidate_text_results = max(n_text_results * 8, 40)
+        else:
+            candidate_text_results = max(n_text_results * 3, 12)
 
-    text_results = vectorstore.query_text(
-        question=question,
-        client=client,
-        text_embedder=text_embedder,
-        doc_id=doc_id,
-        n_results=candidate_text_results,
-    )
+        text_results = vectorstore.query_text(
+            question=question,
+            client=client,
+            text_embedder=text_embedder,
+            doc_id=doc_id,
+            n_results=candidate_text_results,
+        )
 
-    documents = text_results["documents"][0]
-    metadatas = text_results["metadatas"][0]
-    distances = text_results["distances"][0]
+        documents = text_results["documents"][0]
+        metadatas = text_results["metadatas"][0]
+        distances = text_results["distances"][0]
 
-    documents, metadatas, distances = _rerank_text_results(
-        question=question,
-        documents=documents,
-        metadatas=metadatas,
-        distances=distances,
-        max_results=n_text_results,
-    )
+        if not include_tables:
+            # Tables and prose text share one collection (both are
+            # embedded the same way), so "disable tables" is applied as
+            # a pre-filter on the candidate pool rather than a separate
+            # retrieval call.
+            filtered = [
+                (d, m, dist)
+                for d, m, dist in zip(documents, metadatas, distances)
+                if m.get("type") != "table"
+            ]
+            documents = [d for d, _, _ in filtered]
+            metadatas = [m for _, m, _ in filtered]
+            distances = [dist for _, _, dist in filtered]
+
+        documents, metadatas, distances = _rerank_text_results(
+            question=question,
+            documents=documents,
+            metadatas=metadatas,
+            distances=distances,
+            max_results=n_text_results,
+        )
 
     # ========================================================
     # TEXT CONTEXT
@@ -477,33 +499,36 @@ def answer_multimodal_question(
     # ========================================================
     # IMAGE RETRIEVAL
     # ========================================================
-    if architecture_question:
-        image_candidate_count = max(n_image_results * 4, 10)
+    if not include_images:
+        image_metadatas, image_distances = [], []
     else:
-        image_candidate_count = n_image_results
+        if architecture_question:
+            image_candidate_count = max(n_image_results * 4, 10)
+        else:
+            image_candidate_count = n_image_results
 
-    image_query_embedding = image_embedder.encode_text(question)
+        image_query_embedding = image_embedder.encode_text(question)
 
-    image_results = vectorstore.query_image(
-        image_embedding=image_query_embedding,
-        client=client,
-        doc_id=doc_id,
-        n_results=image_candidate_count,
-    )
-
-    all_image_metadatas = image_results["metadatas"][0]
-    all_image_distances = image_results["distances"][0]
-
-    if architecture_question:
-        image_metadatas, image_distances = _select_architecture_images(
-            question=question,
-            image_metadatas=all_image_metadatas,
-            image_distances=all_image_distances,
-            selected_text_metadatas=metadatas,
+        image_results = vectorstore.query_image(
+            image_embedding=image_query_embedding,
+            client=client,
+            doc_id=doc_id,
+            n_results=image_candidate_count,
         )
-    else:
-        image_metadatas = all_image_metadatas
-        image_distances = all_image_distances
+
+        all_image_metadatas = image_results["metadatas"][0]
+        all_image_distances = image_results["distances"][0]
+
+        if architecture_question:
+            image_metadatas, image_distances = _select_architecture_images(
+                question=question,
+                image_metadatas=all_image_metadatas,
+                image_distances=all_image_distances,
+                selected_text_metadatas=metadatas,
+            )
+        else:
+            image_metadatas = all_image_metadatas
+            image_distances = all_image_distances
 
     # ========================================================
     # IMAGE CONTEXT
@@ -529,7 +554,14 @@ def answer_multimodal_question(
         context=context,
         image_paths=image_paths,
         image_context=image_context,
+        temperature=temperature,
     )
+
+    # A minimal, honest grounding signal: true only if we actually found
+    # some evidence to answer from. This doesn't inspect the generated
+    # answer text (that would risk false confidence) - it just reflects
+    # whether retrieval returned anything at all.
+    grounded = bool(documents) or bool(image_metadatas)
 
     # ========================================================
     # CITATIONS
@@ -559,6 +591,7 @@ def answer_multimodal_question(
     # ========================================================
     return {
         "answer": answer,
+        "grounded": grounded,
         "citations": citations,
         "retrieved_text": [
             {
