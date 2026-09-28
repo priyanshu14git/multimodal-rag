@@ -20,12 +20,13 @@ reproduces the pipeline's original fixed behavior, so any other caller of
 
 import html
 import inspect
-import re
 from pathlib import Path
 
 import pandas as pd
 import requests
 import streamlit as st
+
+from utils import parse_markdown_table
 
 # =============================================================================
 # Config
@@ -212,44 +213,6 @@ def check_ollama_health() -> bool:
         return r.status_code == 200
     except requests.exceptions.RequestException:
         return False
-
-
-# =============================================================================
-# Table rendering helper
-# =============================================================================
-
-_SEPARATOR_ROW = re.compile(r"^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$")
-
-
-def parse_markdown_table(md: str):
-    """Parse the pipe-delimited markdown tables this backend emits (see
-    backend/app/services/pdf_parser.py::_rows_to_markdown) into a
-    DataFrame, so retrieved tables render as real tables. Returns None if
-    the content doesn't look like a table — callers fall back to raw
-    markdown in that case."""
-    if not md or "|" not in md:
-        return None
-
-    rows = []
-    for line in md.strip().splitlines():
-        line = line.strip()
-        if not line or _SEPARATOR_ROW.match(line):
-            continue
-        rows.append([c.strip() for c in line.strip("|").split("|")])
-
-    if len(rows) < 1:
-        return None
-
-    width = max(len(r) for r in rows)
-    rows = [r + [""] * (width - len(r)) for r in rows]
-
-    try:
-        header, *body = rows
-        if not body:
-            return None
-        return pd.DataFrame(body, columns=header)
-    except Exception:
-        return None
 
 
 # =============================================================================
@@ -714,4 +677,9 @@ def main() -> None:
             st.rerun()
 
 
-main()
+if __name__ == "__main__":
+    # Streamlit executes the script as __main__, so this is equivalent to
+    # calling main() unconditionally when run via `streamlit run app.py` -
+    # but it also means `import app` (e.g. from a test) does not trigger the
+    # whole UI to render.
+    main()

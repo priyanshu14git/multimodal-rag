@@ -1,0 +1,126 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "doc": "surajreport",
+      "category": "factual",
+      "question": "How many visual failure modes does this study evaluate, and what are they?",
+      "expected_pages": [4],
+      "expected_keywords": ["blur", "noise", "fog", "rain", "night", "occlusion"]
+    },
+    {
+      "id": "q2",
+      "doc": "surajreport",
+      "category": "factual",
+      "question": "How many rows does the multi-degradation dataset contain?",
+      "expected_pages": [4],
+      "expected_keywords": ["44,999"]
+    },
+    {
+      "id": "q3",
+      "doc": "surajreport",
+      "category": "factual",
+      "question": "Which restoration model achieved the best PSNR, and what was its value?",
+      "expected_pages": [4],
+      "expected_keywords": ["HDP-PromptIR", "26.46"]
+    },
+    {
+      "id": "q4",
+      "doc": "surajreport",
+      "category": "architecture",
+      "question": "Explain the Pix2PixHD architecture used in this project.",
+      "expected_pages": [21, 22],
+      "expected_keywords": ["Global Generator", "Local Enhancer", "coarse-to-fine"]
+    },
+    {
+      "id": "q5",
+      "doc": "surajreport",
+      "category": "architecture",
+      "question": "Explain the LaMa architecture.",
+      "expected_pages": [22, 23],
+      "expected_keywords": ["FourierUnit", "Fourier"]
+    },
+    {
+      "id": "q6",
+      "doc": "surajreport",
+      "category": "architecture",
+      "question": "Explain the NAFRestoration architecture.",
+      "expected_pages": [23, 24],
+      "expected_keywords": ["LayerNorm2D", "SimpleGate", "NAFBlock"]
+    },
+    {
+      "id": "q7",
+      "doc": "surajreport",
+      "category": "architecture",
+      "question": "Explain the DFPIR++ architecture.",
+      "expected_pages": [25],
+      "expected_keywords": ["encoder-decoder", "642,645", "degradation"]
+    },
+    {
+      "id": "q8",
+      "doc": "surajreport",
+      "category": "architecture",
+      "question": "Explain the HDP-PromptIR architecture.",
+      "expected_pages": [25, 26],
+      "expected_keywords": ["Transposed Self-Attention", "prompt"]
+    },
+    {
+      "id": "q9",
+      "doc": "surajreport",
+      "category": "architecture",
+      "question": "Explain the HDP-DFPIR++ architecture.",
+      "expected_pages": [26],
+      "expected_keywords": ["Degradation Representation Encoder", "encoder-decoder"]
+    },
+    {
+      "id": "q10",
+      "doc": "surajreport",
+      "category": "table",
+      "question": "What was the robustness score of DFPIR++ compared to Pix2PixHD and LaMa?",
+      "expected_pages": [33],
+      "expected_keywords": ["86.7", "78.9", "81.5"]
+    },
+    {
+      "id": "q11",
+      "doc": "surajreport",
+      "category": "table",
+      "question": "What was the hallucination rate of DFPIR++?",
+      "expected_pages": [34],
+      "expected_keywords": ["5.3"]
+    },
+    {
+      "id": "q12",
+      "doc": "surajreport",
+      "category": "grounding",
+      "question": "What is the capital of France?",
+      "expected_pages": [],
+      "expected_keywords": [],
+      "expect_grounded": false
+    },
+    {
+      "id": "q13",
+      "doc": "sample_report",
+      "category": "table",
+      "question": "What was the revenue in Q4?",
+      "expected_pages": [1],
+      "expected_keywords": ["22"]
+    },
+    {
+      "id": "q14",
+      "doc": "sample_report",
+      "category": "factual",
+      "question": "What is expected to happen in fiscal year 2026?",
+      "expected_pages": [1],
+      "expected_keywords": ["growth", "R&D"]
+    },
+    {
+      "id": "q15",
+      "doc": "sample_report",
+      "category": "grounding",
+      "question": "What was the company's revenue for fiscal year 2019?",
+      "expected_pages": [],
+      "expected_keywords": [],
+      "expect_grounded": false
+    }
+  ]
+}

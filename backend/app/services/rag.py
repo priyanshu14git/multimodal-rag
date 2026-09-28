@@ -25,13 +25,6 @@ etc.) that would apply to *any* technical PDF.
 
 import re
 
-from app.services.embeddings import (
-    get_image_embedder,
-    get_text_embedder,
-)
-from app.services.generation import generate_multimodal_answer
-from app.services import vectorstore
-
 
 # ============================================================
 # Question classification
@@ -105,8 +98,13 @@ def _tokenize(text: str) -> set[str]:
 # thing we boost for — this generalizes to any document.
 
 _NAMED_TERM_PATTERN = re.compile(
-    r"\b[A-Za-z]+(?:[+\-][A-Za-z0-9]+)*\+*\b"
+    r"\b[A-Za-z0-9]+(?:[+\-][A-Za-z0-9]+)*\+*"
 )
+# No trailing \b: "+" is a non-word character, so a boundary can never be
+# satisfied right after a run of trailing "+"s followed by whitespace or
+# punctuation (both sides would be non-word). Anchoring on \b at the end
+# would silently truncate "DFPIR++" down to "DFPIR" - caught by
+# tests/test_rag_reranking.py::test_extract_named_terms_keeps_plus_suffix.
 
 
 def _looks_like_named_term(token: str) -> bool:
@@ -427,6 +425,14 @@ def answer_multimodal_question(
     include_tables: bool = True,
     temperature: float = 0.15,
 ) -> dict:
+    # Imported lazily (rather than at module load) so that the pure
+    # question-classification/reranking functions above can be unit-tested
+    # without pulling in torch/transformers/chromadb - those are only
+    # needed once we actually run the pipeline end-to-end.
+    from app.services import vectorstore
+    from app.services.embeddings import get_image_embedder, get_text_embedder
+    from app.services.generation import generate_multimodal_answer
+
     client = vectorstore.get_client()
     text_embedder = get_text_embedder()
     image_embedder = get_image_embedder()

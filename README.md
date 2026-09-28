@@ -266,23 +266,17 @@ A few choices worth being able to talk through:
 
 ## Known limitations
 
-- `generation.py`'s system prompt still hardcodes a short list of unrelated architecture names
-  (NAFNet, Restormer, Pix2PixHD, LaMa) to explicitly exclude — leftover from tuning against one
-  specific paper. It doesn't break correctness on other documents, but it's not fully general and
-  should eventually be replaced with the same document-agnostic approach used in `rag.py`'s reranker.
 - `config.py`'s `ollama_model` setting isn't actually wired up; the model name is hardcoded in
   `generation.py`.
 - "Remove document" clears frontend state only — there's no backend endpoint to delete an indexed
   document's data from disk or from Chroma.
-- No automated tests or evaluation notebook yet (see [Roadmap](#roadmap)).
 - Not containerized. Ollama in particular is awkward to containerize cleanly for local development,
   so Docker support would likely cover backend + frontend + Chroma only, with Ollama run on the host.
 
 ## Roadmap
 
-- [ ] Unit tests for the pure functions (`chunk_text`, the reranker, markdown-table parsing)
-- [ ] A small eval set (~15 questions across ingested documents) measuring retrieval relevance and
-      answer faithfulness
-- [ ] Generalize `generation.py`'s exclusion list the same way `rag.py`'s reranker was generalized
+- [x] Generalize `generation.py`'s exclusion rule the same way `rag.py`'s reranker was generalized
+- [x] Unit tests for the pure functions (`chunk_text`, the reranker, markdown-table parsing)
+- [x] A small eval set measuring retrieval relevance and answer faithfulness
 - [ ] `docker-compose.yml` for backend + frontend + Chroma volume
 - [ ] `.env.example` documenting every overridable setting
